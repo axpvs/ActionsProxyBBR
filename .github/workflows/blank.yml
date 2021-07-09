@@ -1,4 +1,4 @@
-name: SSR-Proxy
+name: SSR-Proxy.
 
 on:
   push:
