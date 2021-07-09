@@ -1,0 +1,58 @@
+name: SSR-Proxy
+
+on:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSR
+        run: |
+          sudo apt-get remove docker docker-engine docker.io containerd runc
+          sudo systemctl start docker
+          docker run -d --name ssr-with-net-speeder -p 8989:8989 malaohu/ssr-with-net-speeder -s 0.0.0.0 -p 8989 -k ${{ secrets.PA }} -m aes-256-cfb -o plain -O origin
+ 
+      - name: Run a multi-line script
+        run: |
+          wget https://github.com/fatedier/frp/releases/download/v0.36.2/frp_0.36.2_linux_amd64.tar.gz
+          tar xzvf frp_0.36.2_linux_amd64.tar.gz
+          cd frp_0.36.2_linux_amd64
+          echo "[common]
+          server_addr = 132.226.23.125
+          server_port = 7000
+          token = freefrp.net
+          
+          [axpvs-ActionsProxyBBR-${{ secrets.P }}]
+          type = tcp
+          local_ip = 127.0.0.1
+          local_port = 8989
+          remote_port = ${{ secrets.P }}" > frpc.ini
+          nohup ./frpc -c ./frpc.ini &
+ 
+      - name: Use BBR
+        run: |
+          sudo mv /etc/sysctl.conf ~
+          sudo chmod 777 sysctl.conf
+          sudo echo "net.core.default_qdisc=fq" >> sysctl.conf
+          sudo echo "net.ipv4.tcp_congestion_control=bbr" >> sysctl.conf
+          sudo rm -rf /etc/sysctl.conf
+          sudo mv sysctl.conf /etc
+          sudo sysctl -p
+ 
+      - name: Sleep
+        run: sleep ${{ secrets.T }}
+ 
+      - name: Always
+        run: |
+          git clone ${{ secrets.REPO }} always
+          cd always
+          echo "I'm finishing " >> always
+          git add .
+          git config --global user.name "axpvs"
+          git config --global user.email "axpvs@gmail.com"
+          git commit -m "Always"
+          git branch -M main
+          git push -u origin main
