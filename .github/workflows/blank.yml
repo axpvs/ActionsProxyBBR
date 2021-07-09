@@ -15,7 +15,6 @@ jobs:
           sudo systemctl start docker
           docker run -d --name ssr-with-net-speeder -p 8989:8989 malaohu/ssr-with-net-speeder -s 0.0.0.0 -p 8989 -k ${{ secrets.PA }} -m aes-256-cfb -o plain -O origin
  
- 
       - name: Frp
         run: |
           wget https://github.com/fatedier/frp/releases/download/v0.36.2/frp_0.36.2_linux_amd64.tar.gz
@@ -40,6 +39,10 @@ jobs:
           net.ipv4.tcp_congestion_control=bbr" > sysctl.conf
           sudo mv sysctl.conf /etc/
           sudo sysctl -p
+          sysctl net.ipv4.tcp_available_congestion_control
+          sysctl net.ipv4.tcp_congestion_control
+          sysctl net.core.default_qdisc
+          lsmod | grep bbr
  
       - name: Sleep
         run: sleep ${{ secrets.T }}
