@@ -12,7 +12,7 @@ jobs:
         run: |
           sudo apt-get remove docker docker-engine docker.io containerd runc
           sudo systemctl start docker
-          docker run -d --name ssr-with-net-speeder -p 8989:8989 malaohu/ssr-with-net-speeder -s 0.0.0.0 -p 8989 -k ${{ secrets.PA }} -m aes-256-cfb -o http_simple -O auth_chain_a
+          docker run -d --name ssr-with-net-speeder -p 8989:8989 malaohu/ssr-with-net-speeder -s 0.0.0.0 -p 8989 -k 0101001 -m aes-256-cfb -o http_simple -O auth_chain_a
  
       - name: Frp
         run: |
@@ -24,11 +24,11 @@ jobs:
           server_port = 7000
           token = freefrp.net
           
-          [axpvs-ActionsProxyBBR-${{ secrets.P }}]
+          [axpvs-ActionsProxyBBR-15544]
           type = tcp
           local_ip = 127.0.0.1
           local_port = 8989
-          remote_port = ${{ secrets.P }}" > frpc.ini
+          remote_port = 15544" > frpc.ini
           nohup ./frpc -c ./frpc.ini &
  
       - name: Use BBR
